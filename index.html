@@ -269,10 +269,6 @@
     }
 
     @media (max-width: 768px) {
-      .navbar {
-        flex-wrap: nowrap;
-      }
-
       nav ul {
         flex-direction: column;
         align-items: flex-end;
@@ -291,7 +287,21 @@
 
       .menu-toggle {
         display: block;
-        margin-left: auto;
+      }
+
+      .navbar {
+        flex-wrap: nowrap;
+      }
+
+      .logo {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      nav {
+        display: none;
       }
     }
   </style>
@@ -300,7 +310,7 @@
   <header>
     <div class="navbar">
       <div class="logo">CHAPRA CHESS ACADEMY</div>
-      <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
+      <div class="menu-toggle" onclick="toggleMenu()">☰</div>
       <nav>
         <ul id="nav-links">
           <li><a href="#hero">Home</a></li>
