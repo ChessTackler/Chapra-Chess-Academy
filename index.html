@@ -269,6 +269,10 @@
     }
 
     @media (max-width: 768px) {
+      .navbar {
+        flex-wrap: nowrap;
+      }
+
       nav ul {
         flex-direction: column;
         align-items: flex-end;
@@ -287,21 +291,7 @@
 
       .menu-toggle {
         display: block;
-      }
-
-      .navbar {
-        flex-wrap: nowrap;
-      }
-
-      .logo {
-        flex: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      nav {
-        display: none;
+        margin-left: auto;
       }
     }
   </style>
@@ -380,7 +370,7 @@
       </article>
     </div>
     <div id="testimonials" class="testimonials">
-      <h2><a href="testimonials.html" class="section-link">Testimonials</a></h2>
+      <h2><a href="Testimonials.html" class="section-link">Testimonials</a></h2>
       <blockquote>
         "Joining Chapra Chess Academy was a game-changer for me!"
         <footer>- Apoorav Singh, State Level Player</footer>
