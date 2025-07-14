@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chapra Chess Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      position: relative;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      background: url('4051077.jpg') no-repeat center center fixed;
+      background-size: cover;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      opacity: 0.2;
+      z-index: -1;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding-bottom: 100px;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 50px;
+      background-color: rgba(0, 0, 0, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    nav {
+      flex-grow: 1;
+      text-align: right;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 15px;
+      justify-content: flex-end;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    nav ul li a:hover {
+      background-color: #e67e22;
+      color: white;
+      border-color: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .hero {
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    .hero h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .hero h2 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 20px;
+      font-style: italic;
+    }
+
+    section {
+      padding: 60px 50px;
+      background-color: rgba(255, 255, 255, 0.9);
+      margin: 20px;
+      border-radius: 12px;
+    }
+
+    .section-title {
+      font-size: 32px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .service-boxes {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .box {
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px #ccc;
+      border-radius: 8px;
+      width: 30%;
+      min-width: 250px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    .gallery-card {
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      background: #fff;
+    }
+
+    .gallery-card:hover {
+      transform: scale(1.03);
+    }
+
+    .gallery-card img {
+  width: 100%;
+  height: 220px;
+  display: block;
+  object-fit: contain;
+  background-color: #f9f9f9;
+  transition: transform 0.3s ease;
+}
+
+
+    .gallery-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .blog-testimonials {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .blog, .testimonials {
+      width: 48%;
+      min-width: 300px;
+    }
+
+    .blog article {
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .blog article a {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      padding: 8px 16px;
+      background-color: #e67e22;
+      color: white;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .blog article a:hover {
+      background-color: #cf6116;
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .testimonials blockquote {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px #ddd;
+      border-left: 5px solid #e67e22;
+      border-radius: 5px;
+    }
+
+    footer {
+      background-color: #222;
+      color: #ccc;
+      padding: 30px 50px;
+    }
+
+    .footer-info {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    footer h4 {
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    footer p {
+      margin-bottom: 6px;
+    }
+
+    .copyright {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #999;
+    }
+
+    .section-link {
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .section-link:hover {
+      color: #e67e22;
+      transform: scale(1.05);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      nav ul {
+        flex-direction: column;
+        align-items: flex-end;
+        display: none;
+        background-color: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        right: 0;
+        top: 60px;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      nav ul.show {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="navbar">
+      <div class="logo">CHAPRA CHESS ACADEMY</div>
+      <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
+      <nav>
+        <ul id="nav-links">
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#services">About</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#gallery">Gallery</a></li>
+          <li><a href="#blog">Blog</a></li>
+          <li><a href="#testimonials">Testimonials</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="hero" id="hero">
+      <h1>Hello, Welcome to</h1>
+      <h2>CHAPRA CHESS ACADEMY</h2>
+      <p>Trust Your Move. Master the Game.</p>
+    </div>
+  </header>
+
+  <section id="services">
+    <h2 class="section-title">Our Faculties</h2>
+    <div class="service-boxes">
+      <div class="box">
+        <h3>Beginner Training</h3>
+        <p>Learn chess from the ground up with expert guidance.</p>
+      </div>
+      <div class="box">
+        <h3>Advanced Coaching</h3>
+        <p>Sharpen your tactics and strategies to compete at higher levels with our International Coaches.</p>
+      </div>
+      <div class="box">
+        <h3>Tournaments</h3>
+        <p>We organise monthly tournaments every last Sunday of the respective month.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <h2 class="section-title">Gallery</h2>
+    <div class="gallery-grid">
+      <div class="gallery-card">
+        <img src="G1.jpg" alt="Chess Event 1">
+      </div>
+      <div class="gallery-card">
+        <img src="G2.jpg" alt="Chess Event 2">
+      </div>
+      <div class="gallery-card">
+        <img src="G3.jpg" alt="Chess Event 3">
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-testimonials">
+    <div id="blog" class="blog">
+      <h2><a href="Blog.html" class="section-link">Blog</a></h2>
+      <article>
+        <h3>5 Opening Principles Every Player Must Know</h3>
+        <p><strong>Posted by:</strong> Coach Sunny | <em>July 10, 2025</em></p>
+        <p>Good openings lead to strong middlegames. Here's how you can improve yours...</p>
+        <a href="#">Read more</a>
+      </article>
+      <article>
+        <h3>Why Kids Should Learn Chess Early</h3>
+        <p><strong>Posted by:</strong> Coach Randhir | <em>June 25, 2025</em></p>
+        <p>Chess helps build patience, strategy, and focus. Discover the benefits...</p>
+        <a href="#">Read more</a>
+      </article>
+    </div>
+    <div id="testimonials" class="testimonials">
+      <h2><a href="Testimonials.html" class="section-link">Testimonials</a></h2>
+      <blockquote>
+        "Joining Chapra Chess Academy was a game-changer for me!"
+        <footer>- Apoorav Singh, State Level Player</footer>
+      </blockquote>
+      <blockquote>
+        "Great coaches, competitive environment, and friendly atmosphere!"
+        <footer>- Manoj Sir, President of CDCA</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="footer-info">
+      <div>
+        <h4>Contact</h4>
+        <p>Marwari Colony, Gandhi Chowk, Chapra, Bihar</p>
+        <p>Phone: to be updated</p>
+        <p>Email: to be updated</p>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <p>[Facebook] [Twitter] [YouTube]</p>
+      </div>
+    </div>
+    <p class="copyright">© 2025 Chapra Chess Academy. Designed by Chess Tackler</p>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById("nav-links");
+      nav.classList.toggle("show");
+    }
+  </script>
+</body>
+</html>
