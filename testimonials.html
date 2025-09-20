@@ -1,182 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chess Player Testimonials</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body::before {
-      content: "";
-      background: url('BG2.png') no-repeat center center/cover;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      opacity: 0.3;
-      z-index: -1;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Budget Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        dark: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
 </head>
-<body class="text-gray-800 bg-white">
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm">
+            <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Tournament Budget Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <span class="mr-2 text-gray-700 dark:text-gray-300">
+                            <i data-feather="sun"></i>
+                        </span>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                            <input type="checkbox" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                        <span class="text-gray-700 dark:text-gray-300">
+                            <i data-feather="moon"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-  <section class="py-20 px-4 max-w-7xl mx-auto">
-    <h2 class="text-4xl font-bold text-center mb-12">
-      <span class="text-teal-500 text-5xl leading-none">“</span> What Members Are Saying
-    </h2>
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Days Toggle -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+                <div class="flex justify-center space-x-4">
+                    <button id="4days" class="px-6 py-2 bg-blue-500 text-white rounded-md font-medium hover:bg-blue-600 transition duration-300">4 Days Tournament</button>
+                    <button id="3days" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300">3 Days Tournament</button>
+                </div>
+            </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-      <!-- Testimonial 1 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Enhanced my strategic preparation</h3>
-        <p class="text-gray-600 mb-4">This academy has significantly improved my tournament readiness. The coaches are top-notch.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★★</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Shaurya Anand</p>
-            <p class="text-sm text-gray-500">Student, CCA</p>
-          </div>
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-up">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400">Total Budget</p>
+                            <h2 class="text-3xl font-bold text-gray-800 dark:text-white" id="totalBudget">₹88,450</h2>
+                        </div>
+                        <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
+                            <i data-feather="dollar-sign" class="text-blue-500 dark:text-blue-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400">Arbitration Cost</p>
+                            <h2 class="text-3xl font-bold text-gray-800 dark:text-white" id="arbitrationCost">₹20,000</h2>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
+                            <i data-feather="users" class="text-green-500 dark:text-green-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400">Prize Distribution</p>
+                            <h2 class="text-3xl font-bold text-gray-800 dark:text-white" id="prizeCost">₹26,200</h2>
+                        </div>
+                        <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                            <i data-feather="award" class="text-purple-500 dark:text-purple-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-right">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Budget Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-left">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Cost Comparison (3 vs 4 Days)</h3>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8" data-aos="fade-up">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Detailed Expense Breakdown</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">4 Days</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">3 Days</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">Arbitration</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">6 persons @ ₹800/day + 1 chief @ ₹1000/day + food</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹20,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹15,000</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">Refreshment</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">350 players @ ₹15/day</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹21,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹15,750</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">Inauguration</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Decoration, refreshment, water, etc.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹3,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹3,000</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">Group Prizes</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Top 10 prizes for 4 groups</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹23,200</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹23,200</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">School Prizes</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Top 3 prizes</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹3,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹3,000</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">Miscellaneous</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Banner, certificates, stationary, etc.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹13,250</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹13,250</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">Contingency</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Unexpected expenses</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹5,000</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹5,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Prize Structure -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-right">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Group Prize Structure (per group)</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">1st Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹1,500</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">2nd Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹1,000</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">3rd Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹800</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">4th Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹700</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">5th Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹600</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">6th-10th Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹200-300</span>
+                        </div>
+                        <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Total per group</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">Trophies worth ₹5,800</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6" data-aos="fade-left">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">School Prize Structure</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">1st Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹1,500</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">2nd Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹1,000</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 dark:text-gray-300">3rd Place</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Trophy of ₹500</span>
+                        </div>
+                        <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-900 dark:text-white">Total</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">₹3,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Registration CTA -->
+        <div class="container mx-auto px-4 py-12 text-center">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 rounded-xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto" data-aos="zoom-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Join the Tournament?</h2>
+                <p class="text-xl text-blue-100 mb-8">Register now and showcase your chess skills!</p>
+                <a href="https://whatsapp.com/channel/0029VbBQpyi7oQhfgXWzz62w" target="_blank" class="inline-flex items-center px-8 py-4 bg-white dark:bg-gray-900 text-blue-600 dark:text-white font-bold rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i data-feather="user-plus" class="mr-2"></i>
+                    Register Now via WhatsApp
+                </a>
+            </div>
         </div>
-      </div>
 
-      <!-- Testimonial 2 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Game review has never been easier</h3>
-        <p class="text-gray-600 mb-4">In-depth analysis with a personal coach 24/7. Highly recommended.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★☆</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Reyansh</p>
-            <p class="text-sm text-gray-500">Student, CCA</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 3 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Sharpens tactical awareness</h3>
-        <p class="text-gray-600 mb-4">The puzzles and drills keep my calculation skills razor-sharp between tournaments.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★★</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Vivaan Bhardwaj</p>
-            <p class="text-sm text-gray-500">Student, CCA</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 4 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Clean, fast, and intuitive</h3>
-        <p class="text-gray-600 mb-4">The Academy is clean and distraction-free. I analyze all my games here now.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★★</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Prem Kumar</p>
-            <p class="text-sm text-gray-500">1800+ FIDE, CCA</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 5 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Great for coaching sessions</h3>
-        <p class="text-gray-600 mb-4">As a coach, this Academy helps me evaluate my student games and prepare customized lessons.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★★</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">DV</p>
-            <p class="text-sm text-gray-500">Chess Coach</p>
-            <p class="text-sm font-semibold text-yellow-600">Founder, Chess Tackler</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 6 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Helped me earn my peak</h3>
-        <p class="text-gray-600 mb-4">Without this Academy, I doubt I would've opened my rating this fast. I owe it a lot!</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★☆</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Apoorav Singh1</p>
-            <p class="text-sm text-gray-500">1600+ FIDE,Student, CCA</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 7 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Professional-grade mentorship</h3>
-        <p class="text-gray-600 mb-4">I love how up-to-date the coaches are. Great prep before important matches.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★☆</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Kumar Shubham</p>
-            <p class="text-sm text-gray-500">Chess Coach, CCA</p>
-            <p class="text-sm font-semibold text-yellow-600">Senior National Arbiter</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 8 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Great for daily practice</h3>
-        <p class="text-gray-600 mb-4">I play here to warm up. The tactics coach is one of the best I've seen.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★☆</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Amber Srivastava</p>
-            <p class="text-sm text-gray-500">FIDE Rated Player</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 9 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Best online chess resource</h3>
-        <p class="text-gray-600 mb-4">The structured lessons and real-time game feedback are incredible. 5/5.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★★</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Arnav Mehrotra</p>
-            <p class="text-sm text-gray-500">Chess Enthusiast</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonial 10 -->
-      <div class="bg-white p-6 rounded-lg shadow-md hover:-translate-y-1 transition-transform">
-        <h3 class="text-xl font-semibold mb-4">Perfect for young learners</h3>
-        <p class="text-gray-600 mb-4">The Academy’s beginner-friendly environment helped my daughter love the game.</p>
-        <div class="flex items-center mb-4 text-yellow-500">★★★★★</div>
-        <div class="flex items-center">
-          <img src="" class="w-10 h-10 rounded-full mr-4" />
-          <div>
-            <p class="font-medium">Ritik Verma</p>
-            <p class="text-sm text-gray-500">Parent, CCA</p>
-          </div>
-        </div>
-      </div>
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 shadow-sm">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 md:mb-0">© 2023 Tournament Management System</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400">
+                            <i data-feather="info"></i>
+                        </a>
+                        <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400">
+                            <i data-feather="mail"></i>
+                        </a>
+                        <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400">
+                            <i data-feather="settings"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
-  </section>
 
-  <!-- Back Button -->
-  <footer class="mt-16 text-center mb-10">
-    <a href="index.html" class="inline-block text-sm text-gray-700 border border-gray-400 px-5 py-2 rounded-full transition-all duration-300 hover:bg-gray-800 hover:text-white hover:border-gray-800">
-      ← Back
-    </a>
-  </footer>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
 
+        // Dark mode toggle
+        const toggle = document.getElementById('toggle');
+        const html = document.querySelector('html');
+
+        // Check for saved user preference or system preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            toggle.checked = true;
+        }
+
+        toggle.addEventListener('change', function() {
+            if (this.checked) {
+                html.classList.add('dark');
+                localStorage.setItem('darkMode', true);
+            } else {
+                html.classList.remove('dark');
+                localStorage.setItem('darkMode', false);
+            }
+        });
+
+        // Days toggle functionality
+        const fourDaysBtn = document.getElementById('4days');
+        const threeDaysBtn = document.getElementById('3days');
+
+        fourDaysBtn.addEventListener('click', function() {
+            this.classList.add('bg-blue-500', 'text-white');
+            this.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            threeDaysBtn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            threeDaysBtn.classList.remove('bg-blue-500', 'text-white');
+
+            // Update displayed values
+            document.getElementById('totalBudget').textContent = '₹88,450';
+            document.getElementById('arbitrationCost').textContent = '₹20,000';
+            updateCharts(88450, 20000, 21000, 3000, 23200, 3000, 13250, 5000);
+        });
+
+        threeDaysBtn.addEventListener('click', function() {
+            this.classList.add('bg-blue-500', 'text-white');
+            this.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            fourDaysBtn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            fourDaysBtn.classList.remove('bg-blue-500', 'text-white');
+
+            // Update displayed values
+            document.getElementById('totalBudget').textContent = '₹68,200';
+            document.getElementById('arbitrationCost').textContent = '₹15,000';
+            updateCharts(68200, 15000, 15750, 3000, 23200, 3000, 13250, 5000);
+        });
+
+        // Initialize charts
+        let pieChart, barChart;
+
+        function initCharts() {
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Arbitration', 'Refreshment', 'Inauguration', 'Group Prizes', 'School Prizes', 'Miscellaneous', 'Contingency'],
+                    datasets: [{
+                        data: [16000, 21000, 3000, 23200, 3000, 13250, 5000],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#ec4899',
+                            '#64748b',
+                            '#ef4444'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#000',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Arbitration', 'Refreshment', 'Inauguration', 'Group Prizes', 'School Prizes', 'Miscellaneous', 'Contingency', 'Total'],
+                    datasets: [
+                        {
+                            label: '3 Days',
+                            data: [15000, 15750, 3000, 23200, 3000, 13250, 5000, 68200],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4
+                        },
+                        {
+                            label: '4 Days',
+                            data: [20000, 21000, 3000, 23200, 3000, 13250, 5000, 88450],
+                            backgroundColor: '#10b981',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#000'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                },
+                                color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#000'
+                            },
+                            grid: {
+                                color: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#000'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₹' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(total, arbitration, refreshment, inauguration, groupPrizes, schoolPrizes, misc, contingency) {
+            // Update pie chart
+            pieChart.data.datasets[0].data = [arbitration, refreshment, inauguration, groupPrizes, schoolPrizes, misc, contingency];
+            pieChart.update();
+
+            // Update bar chart
+            barChart.data.datasets[0].data = [arbitration, refreshment, inauguration, groupPrizes, schoolPrizes, misc, contingency, total];
+            barChart.data.datasets[1].data = [20000, 21000, 3000, 23200, 3000, 13250, 5000, 88450];
+            barChart.update();
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            initCharts();
+
+            // Set initial active button
+            fourDaysBtn.classList.add('bg-blue-500', 'text-white');
+            fourDaysBtn.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+
+            // Add animation to registration button on hover
+            const registerBtn = document.querySelector('a[href*="whatsapp"]');
+            registerBtn.addEventListener('mouseenter', () => {
+                anime({
+                    targets: registerBtn,
+                    scale: 1.05,
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+            });
+            registerBtn.addEventListener('mouseleave', () => {
+                anime({
+                    targets: registerBtn,
+                    scale: 1,
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+            });
+        });
+    </script>
 </body>
 </html>
