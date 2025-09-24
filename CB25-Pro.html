@@ -73,7 +73,6 @@
   const squaresPerLayer = 200;
   const squareSize = 0.7;
   const layersArray = [];
-
   const squareGeometry = new THREE.PlaneGeometry(squareSize, squareSize);
 
   for(let l=0; l<layers; l++){
@@ -83,7 +82,6 @@
       const material = new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide, transparent:true, opacity:0.7});
       const square = new THREE.Mesh(squareGeometry, material);
 
-      // Random initial positions
       square.position.x = (Math.random()-0.5)*40;
       square.position.y = (Math.random()-0.5)*15 - l*2;
       square.position.z = (Math.random()-0.5)*40;
@@ -97,18 +95,29 @@
     layersArray.push(layerSquares);
   }
 
-  // Floating particle ribbons
-  const particleCount = 300;
+  // Particle ribbons in front
+  const particleCount = 400;
   const particleGeometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount*3);
-  for(let i=0;i<particleCount;i++){
+
+  for(let i=0; i<particleCount; i++){
     positions[i*3] = (Math.random()-0.5)*50;
     positions[i*3+1] = Math.random()*15;
-    positions[i*3+2] = (Math.random()-0.5)*50;
+    positions[i*3+2] = (Math.random()-0.5)*50 - 1; // Slightly in front
   }
+
   particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
-  const particleMaterial = new THREE.PointsMaterial({color:0xffff00, size:0.2, transparent:true, opacity:0.8});
+
+  const particleMaterial = new THREE.PointsMaterial({
+    color: 0xffff00,
+    size: 0.5,           // Visible
+    transparent:true,
+    opacity:1,
+    depthWrite:false
+  });
+
   const particles = new THREE.Points(particleGeometry, particleMaterial);
+  particles.renderOrder = 999; // Render on top
   scene.add(particles);
 
   // Mouse/touch interaction
@@ -126,15 +135,13 @@
     // Animate squares
     layersArray.forEach(layer=>{
       layer.forEach((sq, i)=>{
-        sq.position.y += Math.sin(time + i*0.1)*0.01; // Floating
+        sq.position.y += Math.sin(time + i*0.1)*0.01;
         sq.position.z += Math.cos(time + i*0.1)*0.01;
 
-        // Hover/tilt
         sq.rotation.x += 0.002 + mouse.y*0.02;
         sq.rotation.y += 0.002 + mouse.x*0.02;
 
-        // Color shift
-        sq.material.color.offsetHSL(0.001, 0, 0);
+        sq.material.color.offsetHSL(0.001,0,0); // Color shift
       });
     });
 
@@ -142,7 +149,7 @@
     const pos = particles.geometry.attributes.position.array;
     for(let i=0;i<particleCount;i++){
       pos[i*3+1] += 0.05;
-      if(pos[i*3+1]>15) pos[i*3+1] = 0;
+      if(pos[i*3+1]>15) pos[i*3+1]=0;
     }
     particles.geometry.attributes.position.needsUpdate = true;
     particles.rotation.y += 0.002;
