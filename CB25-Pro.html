@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Effect Chess Website</title>
+<title>3D Hover Background</title>
 <style>
-    /* Basic Reset */
+    /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body, html {
+    html, body {
         width: 100%;
         height: 100%;
-        font-family: Arial, sans-serif;
         overflow: hidden;
+        font-family: Arial, sans-serif;
         background: #111;
         perspective: 1000px; /* Needed for 3D hover effect */
     }
@@ -41,151 +41,46 @@
         background: linear-gradient(45deg, #555, #999);
     }
 
-    /* Chessboard container */
-    #chess-container {
-        position: relative;
+    /* Optional content in the center */
+    #content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         z-index: 10;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        color: #fff;
+        text-align: center;
     }
 
-    /* 2D Chessboard styling */
-    #chessboard {
-        display: grid;
-        grid-template-columns: repeat(8, 60px);
-        grid-template-rows: repeat(8, 60px);
-        border: 2px solid #333;
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
     }
 
-    .square {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 36px;
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .light { background: #f0d9b5; }
-    .dark { background: #b58863; }
-
-    /* Dragged piece */
-    .dragging {
-        opacity: 0.6;
-        position: absolute;
-        pointer-events: none;
-        z-index: 100;
-    }
-
-    /* Reset Button */
-    #reset-btn {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
-        z-index: 20;
-        cursor: pointer;
+    p {
+        font-size: 20px;
+        color: #ccc;
     }
 </style>
 </head>
 <body>
-    <!-- 3D hover background -->
+    <!-- 3D Hover Background -->
     <div id="background"></div>
 
-    <!-- Chessboard container -->
-    <div id="chess-container">
-        <div id="chessboard"></div>
+    <!-- Optional Center Content -->
+    <div id="content">
+        <h1>Welcome</h1>
+        <p>Interactive 3D Hover Background</p>
     </div>
 
-    <button id="reset-btn">Reset Board</button>
-
-    <!-- Chess.js library for move rules -->
-    <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/dist/chess.min.js"></script>
-
     <script>
-        // Generate background tiles
+        // Generate background tiles dynamically
         const background = document.getElementById('background');
-        for(let i=0; i<100; i++){
+        for (let i = 0; i < 100; i++) {
             const tile = document.createElement('div');
             tile.classList.add('bg-tile');
             background.appendChild(tile);
         }
-
-        // Chessboard setup
-        const chessboard = document.getElementById('chessboard');
-        const chess = new Chess(); // chess.js engine
-        const boardSquares = [];
-        const pieceUnicode = {
-            p: "♟", r: "♜", n: "♞", b: "♝", q: "♛", k: "♚",
-            P: "♙", R: "♖", N: "♘", B: "♗", Q: "♕", K: "♔"
-        };
-
-        function createBoard() {
-            chessboard.innerHTML = '';
-            boardSquares.length = 0;
-            const board = chess.board();
-            for(let r=0; r<8; r++){
-                for(let c=0; c<8; c++){
-                    const square = document.createElement('div');
-                    square.classList.add('square');
-                    square.classList.add((r+c)%2 === 0 ? 'light' : 'dark');
-                    const piece = board[r][c];
-                    if(piece) square.textContent = pieceUnicode[piece.type.toUpperCase() === piece.type ? piece.type.toUpperCase() : piece.type.toLowerCase()];
-                    square.dataset.square = String.fromCharCode(97+c) + (8-r);
-                    chessboard.appendChild(square);
-                    boardSquares.push(square);
-                }
-            }
-        }
-
-        createBoard();
-
-        // Reset board
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            chess.reset();
-            createBoard();
-        });
-
-        // Drag and drop logic
-        let draggedPiece = null;
-        let sourceSquare = null;
-
-        chessboard.addEventListener('mousedown', e => {
-            if(e.target.classList.contains('square') && e.target.textContent){
-                draggedPiece = e.target;
-                sourceSquare = e.target.dataset.square;
-                draggedPiece.classList.add('dragging');
-            }
-        });
-
-        document.addEventListener('mousemove', e => {
-            if(draggedPiece){
-                draggedPiece.style.left = e.pageX - 30 + 'px';
-                draggedPiece.style.top = e.pageY - 30 + 'px';
-            }
-        });
-
-        document.addEventListener('mouseup', e => {
-            if(draggedPiece){
-                draggedPiece.classList.remove('dragging');
-                const target = document.elementFromPoint(e.clientX, e.clientY);
-                if(target && target.classList.contains('square')){
-                    const move = chess.move({from: sourceSquare, to: target.dataset.square, promotion: 'q'});
-                    if(move) createBoard(); // Valid move
-                    else createBoard();     // Invalid move, reset piece
-                } else {
-                    createBoard(); // Reset if dropped outside
-                }
-                draggedPiece = null;
-                sourceSquare = null;
-            }
-        });
     </script>
 </body>
 </html>
