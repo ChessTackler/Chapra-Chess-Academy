@@ -24,38 +24,9 @@
     height: 100%;
     z-index: -1;
   }
-
-  #content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    text-align: center;
-    color: #fff;
-  }
-
-  h1 {
-    font-size: 64px;
-    margin-bottom: 16px;
-    background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 25px rgba(255,255,255,0.2);
-  }
-
-  p {
-    font-size: 22px;
-    color: #ccc;
-  }
 </style>
 </head>
 <body>
-<div id="content">
-  <h1>Futuristic Chess Neon</h1>
-  <p>Interactive 3D Chessboard-Themed Background</p>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 <script>
   const scene = new THREE.Scene();
@@ -93,7 +64,7 @@
     }
   }
 
-  // Floating particle ribbons in front
+  // Floating particles in front
   const particleCount = 300;
   const particleGeometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount*3);
@@ -118,7 +89,7 @@
   particles.renderOrder = 999;
   scene.add(particles);
 
-  // Mouse/touch interactivity
+  // Mouse/touch interaction
   let mouse = {x:0, y:0};
   function updateMouse(x,y){ mouse.x = (x/window.innerWidth - 0.5)*2; mouse.y = (y/window.innerHeight - 0.5)*2; }
 
