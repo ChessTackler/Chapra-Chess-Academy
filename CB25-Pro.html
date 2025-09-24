@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessMaster Pro - Play Beautiful Chess</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Floating Chess Pieces Animation */
+        .chess-pieces-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .floating-piece {
+            position: absolute;
+            font-size: 3rem;
+            animation: float 15s infinite linear;
+            color: white;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            to {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid #ffd700;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            color: #ffd700;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo::before {
+            content: "♔";
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ffd700; }
+            to { text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700; }
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-item a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item a:hover {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.6);
+        }
+
+        /* Game Modes Section */
+        .game-modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .mode-card h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-card p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Chessboard Integration Section */
+        .chessboard-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chessboard-section h2 {
+            color: white;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .chessboard-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .python-integration {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            max-width: 600px;
+            border: 2px solid #ffd700;
+        }
+
+        .python-integration h4 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+            margin: 1rem 0;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-item h4 {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(255, 215, 0, 0.1));
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            border-top: 2px solid #ffd700;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #ffd700;
+        }
+
+        /* Modal for Chessboard */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffd700;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pulse Animation for Interactive Elements */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Chess Pieces Background -->
+    <div class="chess-pieces-bg" id="chessPiecesBg"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="#" class="logo">ChessMaster Pro</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#home">Home</a></li>
+                <li class="nav-item"><a href="#play">Play</a></li>
+                <li class="nav-item"><a href="#learn">Learn</a></li>
+                <li class="nav-item"><a href="#tournaments">Tournaments</a></li>
+                <li class="nav-item"><a href="#profile">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="home">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Master the Royal Game</h1>
+            <p>Experience chess like never before with our beautiful, intuitive platform. Challenge players worldwide, solve puzzles, and improve your skills with advanced analytics.</p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary" onclick="startQuickGame()">Quick Play ⚡</button>
+                <button class="btn btn-secondary" onclick="openPythonChessboard()">Python Chessboard 🐍</button>
+            </div>
+        </section>
+
+        <!-- Game Modes -->
+        <section class="game-modes">
+            <div class="mode-card" onclick="selectGameMode('blitz')">
+                <span class="mode-icon">⚡</span>
+                <h3>Blitz Games</h3>
+                <p>Fast-paced 5-minute games for quick excitement. Perfect for testing your tactical skills under pressure.</p>
+                <button class="btn btn-primary">Play Blitz</button>
+            </div>
+
+            <div class="mode-card" onclick="selectGameMode('rapid')">
+                <span class="mode-icon">⏱️</span>
+                <h3>Rapid Games</h3>
+                <p>Balanced 15-minute games combining speed with strategy. Ideal for serious competitive play.</p>
+                <button class="btn btn-primary">Play Rapid</button>
+            </div>
+
+            <div class="mode-card" onclick="selectGameMode('classical')">
+                <span class="mode-icon">🏛️</span>
+                <h3>Classical Games</h3>
+                <p>Deep, thoughtful games with extended time controls. Experience chess as the masters intended.</p>
+                <button class="btn btn-primary">Play Classical</button>
+            </div>
+
+            <div class="mode-card" onclick="selectGameMode('puzzles')">
+                <span class="mode-icon">🧩</span>
+                <h3>Daily Puzzles</h3>
+                <p>Sharpen your tactical vision with our curated puzzle collection. New challenges added daily.</p>
+                <button class="btn btn-primary">Solve Puzzles</button>
+            </div>
+        </section>
+
+        <!-- Python Chessboard Integration -->
+        <section class="chessboard-section">
+            <h2>🐍 Python Chessboard Integration</h2>
+            <div class="chessboard-container">
+                <div class="python-integration">
+                    <h4>Run Your Python Chessboard:</h4>
+                    <div class="code-snippet">
+                        <code>
+# To start your Python chessboard:<br>
+> python Chessboard.py<br><br>
+# Features supported:<br>
+• Full FIDE rule compliance<br>
+• Real-time move validation<br>
+• AI opponent integration<br>
+• PGN export/import<br>
+• Custom themes & pieces
+                        </code>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn btn-primary pulse" onclick="launchPythonChessboard()" style="font-size: 1.2rem; padding: 1.2rem 2.5rem;">
+                        🚀 Launch Python Chessboard
+                    </button>
+                    <p style="color: rgba(255,255,255,0.8); margin-top: 1rem;">
+                        Seamlessly integrates with your local Python chess engine
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section class="features-grid">
+            <div class="feature-item">
+                <h4>🎯 Smart Matchmaking</h4>
+                <p>Advanced ELO-based system finds perfect opponents for your skill level</p>
+            </div>
+            <div class="feature-item">
+                <h4>📊 Deep Analytics</h4>
+                <p>Detailed game analysis with accuracy ratings and improvement suggestions</p>
+            </div>
+            <div class="feature-item">
+                <h4>🏆 Tournaments</h4>
+                <p>Join Swiss, Arena, and Round-Robin tournaments with players worldwide</p>
+            </div>
+            <div class="feature-item">
+                <h4>🤖 AI Training</h4>
+                <p>Practice against configurable AI opponents from beginner to grandmaster level</p>
+            </div>
+            <div class="feature-item">
+                <h4>📚 Opening Library</h4>
+                <p>Comprehensive database of chess openings with theory and variations</p>
+            </div>
+            <div class="feature-item">
+                <h4>🎨 Customization</h4>
+                <p>Beautiful themes, 3D boards, and piece sets to personalize your experience</p>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <h2 style="color: white; margin-bottom: 1rem;">Join Our Growing Community</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number" id="activePlayersCount">2,547</span>
+                    <span class="stat-label">Active Players</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="gamesPlayedCount">183,492</span>
+                    <span class="stat-label">Games Played</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="puzzlesSolvedCount">45,681</span>
+                    <span class="stat-label">Puzzles Solved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="tournamentsCount">1,234</span>
+                    <span class="stat-label">Tournaments</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Python Chessboard -->
+    <div id="chessboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Python Chessboard Integration</h2>
+            <div style="padding: 2rem; text-align: center;">
+                <div class="loading" id="loadingSpinner"></div>
+                <p style="margin: 2rem 0;">Starting Python chessboard...</p>
+                <div style="background: #f0f0f0; padding: 1rem; border-radius: 10px; margin: 1rem 0; font-family: monospace;">
+                    <strong>Command:</strong> python Chessboard.py
+                </div>
+                <p style="color: #666; font-size: 0.9rem;">
+                    Make sure you have the Chessboard.py file in your current directory and Python installed on your system.
+                </p>
+                <button class="btn btn-primary" onclick="simulatePythonLaunch()" style="margin-top: 1rem;">
+                    Simulate Local Launch
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#about">About Us</a>
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#support">Support</a>
+                <a href="#api">Developer API</a>
+            </div>
+            <p>&copy; 2024 ChessMaster Pro. All rights reserved. Made with ♔ for chess lovers.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Floating chess pieces animation
+        function createFloatingPieces() {
+            const pieces = ['♔', '♕', '♖', '♗', '♘', '♙', '♚', '♛', '♜', '♝', '♞', '♟'];
+            const container = document.getElementById('chessPiecesBg');
+            
+            setInterval(() => {
+                const piece = document.createElement('div');
+                piece.className = 'floating-piece';
+                piece.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.animationDelay = Math.random() * 2 + 's';
+                piece.style.animationDuration = (15 + Math.random() * 10) + 's';
+                
+                container.appendChild(piece);
+                
+                setTimeout(() => {
+                    piece.remove();
+                }, 25000);
+            }, 3000);
+        }
+
+        // Initialize floating pieces
+        createFloatingPieces();
+
+        // Counter animations
+        function animateCounter(elementId, targetNumber, duration = 2000) {
+            const element = document.getElementById(elementId);
+            const start = 0;
+            const increment = targetNumber / (duration / 50);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= targetNumber) {
+                    current = targetNumber;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 50);
+        }
+
+        // Start counter animations when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                animateCounter('activePlayersCount', 2547);
+                animateCounter('gamesPlayedCount', 183492);
+                animateCounter('puzzlesSolvedCount', 45681);
+                animateCounter('tournamentsCount', 1234);
+            }, 1000);
+        });
+
+        // Game mode selection
+        function selectGameMode(mode) {
+            const messages = {
+                'blitz': 'Starting Blitz game... Finding opponent! ⚡',
+                'rapid': 'Preparing Rapid game... Matching skills! ⏱️',
+                'classical': 'Setting up Classical game... Perfect match! 🏛️',
+                'puzzles': 'Loading daily puzzles... Ready to solve! 🧩'
+            };
+            
+            showNotification(messages[mode] || 'Starting game...');
+            
+            // Simulate game start
+            setTimeout(() => {
+                showNotification('Game ready! Good luck! 🎯');
+            }, 2000);
+        }
+
+        // Quick game function
+        function startQuickGame() {
+            showNotification('Finding opponent for quick game... ⚡');
+            setTimeout(() => {
+                showNotification('Opponent found! Starting game... 🎮');
+            }, 1500);
+        }
+
+        // Python chessboard functions
+        function openPythonChessboard() {
+            document.getElementById('chessboardModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('chessboardModal').style.display = 'none';
+        }
+
+        function launchPythonChessboard() {
+            showNotification('Attempting to launch Python chessboard... 🐍');
+            
+            // In a real implementation, this would communicate with a backend
+            // to execute the Python script
+            try {
+                // This would be replaced with actual backend communication
+                console.log('Executing: python Chessboard.py');
+                showNotification('Command sent to system! Check your terminal. ✅');
+                
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
+            } catch (error) {
+                showNotification('Please run "python Chessboard.py" manually in your terminal. 💻');
+            }
+        }
+
+        function simulatePythonLaunch() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            loadingSpinner.style.display = 'inline-block';
+            
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                showNotification('Python chessboard simulation complete! 🎉');
+                closeModal();
+            }, 3000);
+        }
+
+        // Notification system
+        function showNotification(message) {
+            // Remove existing notification
+            const existing = document.getElementById('notification');
+            if (existing) {
+                existing.remove();
+            }
+            
+            // Create notification
+            const notification = document.createElement('div');
+            notification.id = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(45deg, #ffd700, #ffed4e);
+                color: #333;
+                padding: 1rem 2rem;
+                border-radius: 50px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 3000;
+                font-weight: 600;
+                animation: slideIn 0.5s ease-out;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.5s ease-in';
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 4000);
+        }
+
+        // Add slide animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('chessboardModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Welcome message
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                showNotification('Welcome to ChessMaster Pro! Ready to play? ♔');
+            }, 1000);
+        });
+
+        // Add some interactivity to mode cards
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
