@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interactive 3D Neon Background</title>
+<title>Futuristic 3D Neon Chessboard Background</title>
 <style>
   html, body {
     margin: 0;
@@ -32,7 +32,7 @@
   h1 {
     font-size: 60px;
     margin-bottom: 16px;
-    background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 25px rgba(255,255,255,0.2);
@@ -46,12 +46,11 @@
 </head>
 <body>
 <div id="content">
-  <h1>Interactive Neon Grid</h1>
-  <p>Drag to rotate the scene</p>
+  <h1>3D Neon Chessboard</h1>
+  <p>Interactive Futuristic Background</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
 <script>
   // Scene setup
   const scene = new THREE.Scene();
@@ -63,92 +62,90 @@
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
 
-  // OrbitControls for click/touch rotation
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
-  controls.enableZoom = false; // Disable zoom
-  controls.enablePan = false;  // Disable pan
-  controls.rotateSpeed = 0.5;
-  controls.minPolarAngle = 0.2;
-  controls.maxPolarAngle = Math.PI/2.2;
+  // Chessboard plane geometry
+  const gridSize = 40;
+  const segments = 16; // 8x8 squares, each square has 2 segments
+  const geometry = new THREE.PlaneGeometry(gridSize, gridSize, segments, segments);
+  geometry.rotateX(-Math.PI/2);
 
-  // Multi-layer neon grids
-  const grids = [];
-  const gridColors = [0x00ffff, 0xff00ff, 0xffff00];
-  const gridSegments = 30;
-  const gridSize = 50;
+  // Create colors for chessboard pattern
+  const colors = [];
+  const rows = segments;
+  const cols = segments;
+  for(let i=0; i<=rows; i++){
+    for(let j=0; j<=cols; j++){
+      const isWhite = ((Math.floor(i/2) + Math.floor(j/2)) % 2 === 0);
+      if(isWhite){
+        colors.push(0,1,1); // cyan neon for white squares
+      } else {
+        colors.push(1,0,1); // magenta neon for black squares
+      }
+    }
+  }
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
 
-  for(let g=0; g<3; g++){
-    const geometry = new THREE.PlaneGeometry(gridSize, gridSize, gridSegments, gridSegments);
-    geometry.rotateX(-Math.PI/2);
-    const material = new THREE.MeshBasicMaterial({
-      color: gridColors[g],
-      wireframe: true,
-      opacity: 0.2 + g*0.2,
-      transparent: true
+  // Material using vertex colors for neon effect
+  const material = new THREE.MeshBasicMaterial({
+    vertexColors:true,
+    wireframe:false,
+    opacity:0.6,
+    transparent:true
+  });
+
+  const chessboard = new THREE.Mesh(geometry, material);
+  scene.add(chessboard);
+
+  // Neon points overlay
+  const pointsMaterial = new THREE.PointsMaterial({size:0.15, vertexColors:false, color:0xff00ff, transparent:true, opacity:0.7});
+  const points = new THREE.Points(geometry, pointsMaterial);
+  scene.add(points);
+
+  // Store original positions for wave
+  const vertexCount = geometry.attributes.position.count;
+  const originalPositions = [];
+  for(let i=0;i<vertexCount;i++){
+    originalPositions.push({
+      x: geometry.attributes.position.getX(i),
+      y: geometry.attributes.position.getY(i),
+      z: geometry.attributes.position.getZ(i)
     });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.y = -g*2;
-    scene.add(mesh);
-    grids.push({mesh, geometry});
   }
 
-  // Glowing particles
-  const particleCount = 300;
-  const particleGeometry = new THREE.BufferGeometry();
-  const particlePositions = new Float32Array(particleCount*3);
+  // Mouse / touch interactivity
+  let mouse = {x:0, y:0};
+  function updateMouse(x,y){ mouse.x = (x/window.innerWidth - 0.5)*2; mouse.y = (y/window.innerHeight - 0.5)*2; }
+  window.addEventListener('mousemove', e=>updateMouse(e.clientX,e.clientY));
+  window.addEventListener('touchmove', e=>{ if(e.touches.length>0) updateMouse(e.touches[0].clientX,e.touches[0].clientY); });
 
-  for(let i=0; i<particleCount; i++){
-    particlePositions[i*3] = (Math.random()-0.5)*gridSize*2;
-    particlePositions[i*3+1] = Math.random()*10;
-    particlePositions[i*3+2] = (Math.random()-0.5)*gridSize*2;
-  }
-
-  particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions,3));
-  const particleMaterial = new THREE.PointsMaterial({color:0xff00ff, size:0.2, transparent:true, opacity:0.8});
-  const particles = new THREE.Points(particleGeometry, particleMaterial);
-  scene.add(particles);
-
-  // Store original Y positions for wave animation
-  const vertexCount = grids[0].geometry.attributes.position.count;
-  const originalY = [];
-  for(let i=0; i<vertexCount; i++){
-    originalY.push(grids[0].geometry.attributes.position.getY(i));
-  }
-
-  // Animate
+  // Animation
   function animate(){
     requestAnimationFrame(animate);
 
     const time = Date.now()*0.002;
+    const positions = geometry.attributes.position;
 
-    // Animate grid vertices as waves
-    grids.forEach((g, idx)=>{
-      const pos = g.geometry.attributes.position;
-      for(let i=0;i<pos.count;i++){
-        pos.setY(i, originalY[i] + Math.sin(i*0.3 + time + idx*2)*0.5 - idx*2);
-      }
-      pos.needsUpdate = true;
-    });
-
-    // Floating particle ribbons
-    const positions = particles.geometry.attributes.position.array;
-    for(let i=0;i<particleCount;i++){
-      positions[i*3+1] += 0.05;
-      if(positions[i*3+1]>10) positions[i*3+1] = 0;
+    // Wave effect
+    for(let i=0;i<vertexCount;i++){
+      const orig = originalPositions[i];
+      const wave = Math.sin(i*0.3 + time)*0.5;
+      positions.setY(i, wave);
     }
-    particles.geometry.attributes.position.needsUpdate = true;
-    particles.rotation.y += 0.002;
+    positions.needsUpdate = true;
+    points.geometry.attributes.position.needsUpdate = true;
 
-    controls.update(); // Important: maintains camera rotation after drag
+    // Tilt with mouse
+    chessboard.rotation.z = mouse.x * 0.3;
+    points.rotation.z = mouse.x * 0.3;
+    chessboard.rotation.x = -Math.PI/2 + mouse.y*0.3;
+    points.rotation.x = -Math.PI/2 + mouse.y*0.3;
+
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // Responsive
-  window.addEventListener('resize', ()=>{
+  // Resize handling
+  window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
