@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Futuristic 3D Neon Background</title>
+<title>Interactive 3D Neon Background</title>
 <style>
   html, body {
     margin: 0;
@@ -46,11 +46,12 @@
 </head>
 <body>
 <div id="content">
-  <h1>Futuristic Neon Grid</h1>
-  <p>Interactive 3D Waves & Glowing Particles</p>
+  <h1>Interactive Neon Grid</h1>
+  <p>Rotate the scene by dragging your mouse or finger</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
 <script>
   // Scene setup
   const scene = new THREE.Scene();
@@ -62,7 +63,16 @@
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
 
-  // Neon grids (multiple layers for depth)
+  // OrbitControls for click-drag rotation
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enableZoom = false;      // Disable zoom
+  controls.enablePan = false;       // Disable pan
+  controls.rotateSpeed = 0.5;       // Adjust rotation speed
+  controls.minPolarAngle = 0.2;     // Limit vertical rotation
+  controls.maxPolarAngle = Math.PI/2.2;
+
+  // Multi-layer neon grids
   const grids = [];
   const gridCount = 3;
   const gridColors = [0x00ffff, 0xff00ff, 0xffff00];
@@ -100,13 +110,14 @@
   const particles = new THREE.Points(particleGeometry, particleMaterial);
   scene.add(particles);
 
-  // Mouse / touch interactivity
-  let mouse = {x:0, y:0};
-  function updateMouse(x,y){ mouse.x = (x/window.innerWidth - 0.5)*2; mouse.y = (y/window.innerHeight - 0.5)*2; }
-  window.addEventListener('mousemove', e=>updateMouse(e.clientX,e.clientY));
-  window.addEventListener('touchmove', e=>{ if(e.touches.length>0) updateMouse(e.touches[0].clientX,e.touches[0].clientY); });
+  // Store original vertex positions for wave animation
+  const vertexCount = grids[0].geometry.attributes.position.count;
+  const originalPositions = [];
+  for(let i=0; i<vertexCount; i++){
+    originalPositions.push(grids[0].geometry.attributes.position.getY(i));
+  }
 
-  // Animation
+  // Animate function
   function animate(){
     requestAnimationFrame(animate);
 
@@ -116,11 +127,9 @@
     grids.forEach((g, idx)=>{
       const geom = g.geometry.attributes.position;
       for(let i=0;i<geom.count;i++){
-        geom.setY(i, Math.sin(i*0.3 + time + idx*2)*0.5 - idx*2);
+        geom.setY(i, originalPositions[i] + Math.sin(i*0.3 + time + idx*2)*0.5 - idx*2);
       }
       geom.needsUpdate = true;
-      g.mesh.rotation.z = mouse.x * 0.3;
-      g.mesh.rotation.x = -Math.PI/2 + mouse.y*0.3;
     });
 
     // Floating particle ribbons
@@ -132,12 +141,13 @@
     particles.geometry.attributes.position.needsUpdate = true;
     particles.rotation.y += 0.002;
 
+    controls.update(); // Update OrbitControls
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // Resize
+  // Handle resize
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
