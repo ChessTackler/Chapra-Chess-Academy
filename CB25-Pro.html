@@ -47,7 +47,7 @@
 <body>
 <div id="content">
   <h1>Interactive Neon Grid</h1>
-  <p>Rotate the scene by dragging your mouse or finger</p>
+  <p>Drag to rotate the scene</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
@@ -63,23 +63,23 @@
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
 
-  // OrbitControls for click-drag rotation
+  // OrbitControls for click/touch rotation
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.enableZoom = false;      // Disable zoom
-  controls.enablePan = false;       // Disable pan
-  controls.rotateSpeed = 0.5;       // Adjust rotation speed
-  controls.minPolarAngle = 0.2;     // Limit vertical rotation
+  controls.dampingFactor = 0.05;
+  controls.enableZoom = false; // Disable zoom
+  controls.enablePan = false;  // Disable pan
+  controls.rotateSpeed = 0.5;
+  controls.minPolarAngle = 0.2;
   controls.maxPolarAngle = Math.PI/2.2;
 
   // Multi-layer neon grids
   const grids = [];
-  const gridCount = 3;
   const gridColors = [0x00ffff, 0xff00ff, 0xffff00];
-  const gridSegments = 40;
+  const gridSegments = 30;
   const gridSize = 50;
 
-  for(let g=0; g<gridCount; g++){
+  for(let g=0; g<3; g++){
     const geometry = new THREE.PlaneGeometry(gridSize, gridSize, gridSegments, gridSegments);
     geometry.rotateX(-Math.PI/2);
     const material = new THREE.MeshBasicMaterial({
@@ -110,45 +110,45 @@
   const particles = new THREE.Points(particleGeometry, particleMaterial);
   scene.add(particles);
 
-  // Store original vertex positions for wave animation
+  // Store original Y positions for wave animation
   const vertexCount = grids[0].geometry.attributes.position.count;
-  const originalPositions = [];
+  const originalY = [];
   for(let i=0; i<vertexCount; i++){
-    originalPositions.push(grids[0].geometry.attributes.position.getY(i));
+    originalY.push(grids[0].geometry.attributes.position.getY(i));
   }
 
-  // Animate function
+  // Animate
   function animate(){
     requestAnimationFrame(animate);
 
     const time = Date.now()*0.002;
 
-    // Wave animation for grids
+    // Animate grid vertices as waves
     grids.forEach((g, idx)=>{
-      const geom = g.geometry.attributes.position;
-      for(let i=0;i<geom.count;i++){
-        geom.setY(i, originalPositions[i] + Math.sin(i*0.3 + time + idx*2)*0.5 - idx*2);
+      const pos = g.geometry.attributes.position;
+      for(let i=0;i<pos.count;i++){
+        pos.setY(i, originalY[i] + Math.sin(i*0.3 + time + idx*2)*0.5 - idx*2);
       }
-      geom.needsUpdate = true;
+      pos.needsUpdate = true;
     });
 
     // Floating particle ribbons
     const positions = particles.geometry.attributes.position.array;
     for(let i=0;i<particleCount;i++){
-      positions[i*3+1] += 0.05; // rise
+      positions[i*3+1] += 0.05;
       if(positions[i*3+1]>10) positions[i*3+1] = 0;
     }
     particles.geometry.attributes.position.needsUpdate = true;
     particles.rotation.y += 0.002;
 
-    controls.update(); // Update OrbitControls
+    controls.update(); // Important: maintains camera rotation after drag
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // Handle resize
-  window.addEventListener('resize', () => {
+  // Responsive
+  window.addEventListener('resize', ()=>{
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
