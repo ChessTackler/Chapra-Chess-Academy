@@ -548,4 +548,103 @@ class ChessPlatform:
         }
 
         # Export PGN
-        pg
+        pgn_data = self._export_pgn(game)
+
+        # Notify players
+        await self.websocket_manager.broadcast_to_game(game.game_id, {
+            "type": "game_end",
+            "result": result,
+            "pgn": pgn_data
+        })
+
+    async def _update_ratings(self, game: GameSession, result: str):
+        """Update player ratings using Glicko-2 system"""
+        # Simplified rating update - would use proper Glicko-2 implementation
+        white_player = game.white_player
+        black_player = game.black_player
+
+        if not black_player:  # vs AI
+            return
+
+        # Update games played
+        white_player.games_played += 1
+        black_player.games_played += 1
+
+        # Update win/loss/draw records
+        if "white_wins" in result:
+            white_player.wins += 1
+            black_player.losses += 1
+            # Rating adjustment logic here
+        elif "black_wins" in result:
+            black_player.wins += 1
+            white_player.losses += 1
+        else:  # Draw
+            white_player.draws += 1
+            black_player.draws += 1
+
+    def _export_pgn(self, game: GameSession) -> str:
+        """Export game to PGN format"""
+        pgn_game = chess.pgn.Game()
+        pgn_game.headers["White"] = game.white_player.username
+        pgn_game.headers["Black"] = game.black_player.username if game.black_player else "AI"
+        pgn_game.headers["Date"] = game.game_start_time.strftime("%Y.%m.%d")
+        pgn_game.headers["TimeControl"] = str(game.time_control)
+        pgn_game.headers["Variant"] = game.variant.value
+
+        # Add moves
+        board = chess.Board()
+        node = pgn_game
+        for move in game.engine.move_history:
+            node = node.add_variation(move)
+            board.push(move)
+
+        return str(pgn_game)
+
+# Example usage and testing
+async def main():
+    """Example platform usage"""
+    platform = ChessPlatform()
+
+    # Create players
+    player1_id = await platform.create_player("AliceChess", "alice@example.com")
+    player2_id = await platform.create_player("BobGM", "bob@example.com")
+
+    # Start a game
+    time_control = TimeControl(600, 5)  # 10+5 minutes
+    game_id = await platform.start_game(player1_id, player2_id, time_control)
+
+    # Make some moves
+    await platform.make_move(game_id, player1_id, "e2e4")
+    await platform.make_move(game_id, player2_id, "e7e5")
+    await platform.make_move(game_id, player1_id, "g1f3")
+
+    print(f"Game {game_id} started successfully!")
+    print(f"Current position: {platform.games[game_id].engine.board.fen()}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+# Additional modules would include:
+# - Database models (SQLAlchemy/PostgreSQL)
+# - REST API endpoints (FastAPI/Flask)
+# - WebSocket handlers
+# - Authentication & security
+# - Frontend React/Vue components
+# - Mobile app integration
+# - Tournament management UI
+# - Analytics dashboards
+# - Engine integration (Stockfish, Leela)
+# - Puzzle generation system
+# - Study/opening book tools
+# - Streaming/broadcast features
+# - Club/team management
+# - Coaching tools
+# - Payment processing
+# - Localization system
+# - Accessibility features
+# - Performance monitoring
+# - Anti-cheat ML models
+# - Content moderation
+# - Admin panel
+# - API documentation
+# - Deployment configs (Docker/K8s)
