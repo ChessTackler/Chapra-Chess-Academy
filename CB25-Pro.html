@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Futuristic Chess Neon Background</title>
+<title>Ultimate Futuristic Chess Neon</title>
 <style>
   html, body {
     margin: 0;
@@ -51,83 +51,113 @@
 </style>
 </head>
 <body>
-
 <div id="content">
-  <h1>Futuristic Chess Neon</h1>
-  <p>Interactive 3D Floating Squares</p>
+  <h1>Ultimate Neon Chess</h1>
+  <p>Interactive 3D Floating Neon Squares & Particles</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 <script>
-  // Scene and camera setup
+  // Scene & camera
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 12, 25);
+  camera.position.set(0, 15, 30);
 
   const renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
 
-  // Chessboard-inspired floating squares
-  const squareCount = 500;
-  const squares = [];
+  // Multi-layered floating squares
+  const layers = 3;
+  const squaresPerLayer = 200;
   const squareSize = 0.7;
-  const colors = [0x00ffff, 0xff00ff]; // Neon alternating colors
+  const layersArray = [];
 
   const squareGeometry = new THREE.PlaneGeometry(squareSize, squareSize);
-  for(let i=0; i<squareCount; i++){
-    const color = colors[i % 2];
-    const material = new THREE.MeshBasicMaterial({color: color, side:THREE.DoubleSide, transparent:true, opacity:0.7});
-    const square = new THREE.Mesh(squareGeometry, material);
 
-    square.position.x = (Math.random()-0.5)*40;
-    square.position.y = (Math.random()-0.5)*20;
-    square.position.z = (Math.random()-0.5)*40;
+  for(let l=0; l<layers; l++){
+    const layerSquares = [];
+    for(let i=0; i<squaresPerLayer; i++){
+      const color = new THREE.Color(`hsl(${Math.random()*360}, 100%, 50%)`);
+      const material = new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide, transparent:true, opacity:0.7});
+      const square = new THREE.Mesh(squareGeometry, material);
 
-    square.rotation.x = Math.random()*Math.PI;
-    square.rotation.y = Math.random()*Math.PI;
+      // Random initial positions
+      square.position.x = (Math.random()-0.5)*40;
+      square.position.y = (Math.random()-0.5)*15 - l*2;
+      square.position.z = (Math.random()-0.5)*40;
 
-    scene.add(square);
-    squares.push(square);
+      square.rotation.x = Math.random()*Math.PI;
+      square.rotation.y = Math.random()*Math.PI;
+
+      scene.add(square);
+      layerSquares.push(square);
+    }
+    layersArray.push(layerSquares);
   }
 
-  // Mouse and touch interaction
+  // Floating particle ribbons
+  const particleCount = 300;
+  const particleGeometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount*3);
+  for(let i=0;i<particleCount;i++){
+    positions[i*3] = (Math.random()-0.5)*50;
+    positions[i*3+1] = Math.random()*15;
+    positions[i*3+2] = (Math.random()-0.5)*50;
+  }
+  particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  const particleMaterial = new THREE.PointsMaterial({color:0xffff00, size:0.2, transparent:true, opacity:0.8});
+  const particles = new THREE.Points(particleGeometry, particleMaterial);
+  scene.add(particles);
+
+  // Mouse/touch interaction
   let mouse = {x:0, y:0};
   function updateMouse(x,y){ mouse.x = (x/window.innerWidth - 0.5)*2; mouse.y = (y/window.innerHeight - 0.5)*2; }
 
   window.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
-  window.addEventListener('touchmove', e => {
-    if(e.touches.length > 0) updateMouse(e.touches[0].clientX, e.touches[0].clientY);
-  });
+  window.addEventListener('touchmove', e => { if(e.touches.length>0) updateMouse(e.touches[0].clientX,e.touches[0].clientY); });
 
-  // Animate squares
+  // Animate
   function animate(){
     requestAnimationFrame(animate);
-    const time = Date.now()*0.001;
+    const time = Date.now()*0.002;
 
-    squares.forEach((sq, i)=>{
-      // Floating motion
-      sq.position.y += Math.sin(time + i)*0.01;
-      sq.position.z += Math.cos(time + i)*0.01;
+    // Animate squares
+    layersArray.forEach(layer=>{
+      layer.forEach((sq, i)=>{
+        sq.position.y += Math.sin(time + i*0.1)*0.01; // Floating
+        sq.position.z += Math.cos(time + i*0.1)*0.01;
 
-      // Hover/tilt interaction
-      sq.rotation.x += 0.002 + mouse.y*0.02;
-      sq.rotation.y += 0.002 + mouse.x*0.02;
+        // Hover/tilt
+        sq.rotation.x += 0.002 + mouse.y*0.02;
+        sq.rotation.y += 0.002 + mouse.x*0.02;
+
+        // Color shift
+        sq.material.color.offsetHSL(0.001, 0, 0);
+      });
     });
+
+    // Animate particles
+    const pos = particles.geometry.attributes.position.array;
+    for(let i=0;i<particleCount;i++){
+      pos[i*3+1] += 0.05;
+      if(pos[i*3+1]>15) pos[i*3+1] = 0;
+    }
+    particles.geometry.attributes.position.needsUpdate = true;
+    particles.rotation.y += 0.002;
 
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // Fullscreen responsive
+  // Resize
   window.addEventListener('resize', ()=>{
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 </script>
-
 </body>
 </html>
