@@ -3,33 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <title>GSAP SplitText Example</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+
   <style>
     body {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: #f3f4f6;
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
       margin: 0;
     }
     h1 {
-      font-size: 3rem;
-      font-weight: bold;
-      color: #2563eb;
+      font-family: "Poppins", sans-serif;
+      font-size: 3.5rem;
+      font-weight: 600;
+      color: #fff;
       text-align: center;
       overflow: hidden;
       display: inline-block;
+      letter-spacing: 2px;
     }
     .char {
       display: inline-block;
       opacity: 0;
-      transform: translateY(40px);
+      transform: translateY(50px) scale(0.8);
       will-change: transform, opacity;
     }
   </style>
 </head>
 <body>
-  <h1 id="split">Hello, GSAP!</h1>
+  <h1 id="split">Welcome to Chess Tackler</h1>
 
   <!-- GSAP CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -52,9 +57,10 @@
     gsap.to(".char", {
       opacity: 1,
       y: 0,
+      scale: 1,
       duration: 0.6,
-      ease: "power3.out",
-      stagger: 0.1,
+      ease: "back.out(1.7)",
+      stagger: 0.08,
       onComplete: () => console.log("✅ Animation complete!")
     });
   </script>
