@@ -3,73 +3,121 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MyDiary+ — Secure Personal Diary</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<title>MyDiary+ — Private Diary with Copy & View</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+
 <style>
-body{font-family:'Poppins',sans-serif;background:linear-gradient(120deg,#e0e7ff,#f5f3ff);}
-.card{transition:all .3s ease;}
-.card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 8px 16px rgba(0,0,0,0.15);}
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, #e0e7ff, #f5f3ff);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.card {
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
 </style>
 </head>
+
 <body class="text-gray-800">
 
+<!-- Navbar -->
 <nav class="bg-white bg-opacity-90 shadow-md py-4 px-6 flex justify-between items-center">
-  <h1 class="text-3xl font-bold text-indigo-600">📘 MyDiary+</h1>
+  <h1 class="text-3xl font-extrabold text-indigo-600">📔 MyDiary+</h1>
   <button onclick="toggleForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">+ New Entry</button>
 </nav>
 
+<!-- Form -->
 <section id="form" class="hidden bg-white shadow-xl mx-auto mt-6 w-11/12 md:w-2/3 p-6 rounded-xl">
-  <input id="title" placeholder="Title..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400">
+  <input id="title" placeholder="Title..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400" />
   <textarea id="content" placeholder="Write your thoughts..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 h-36"></textarea>
   <button onclick="saveEntry()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg">Save Entry</button>
 </section>
 
+<!-- Entries -->
 <main id="entries" class="grid gap-6 mt-8 p-6 md:grid-cols-2 lg:grid-cols-3"></main>
+
+<!-- Modal for viewing -->
+<div id="viewModal" class="hidden modal">
+  <div class="modal-content">
+    <h2 id="viewTitle" class="text-2xl font-bold text-indigo-600 mb-2"></h2>
+    <p id="viewContent" class="whitespace-pre-line text-gray-700 mb-4"></p>
+    <div class="text-sm text-gray-500 mb-3" id="viewDate"></div>
+    <div class="flex justify-end gap-3">
+      <button onclick="copyContent()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded-lg">Copy Text</button>
+      <button onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded-lg">Close</button>
+    </div>
+  </div>
+</div>
 
 <script>
 let db;
+let currentContent = "";
 
-// Initialize IndexedDB
-const request = indexedDB.open("MyDiaryDB", 1);
+// IndexedDB setup
+const request = indexedDB.open("MyDiaryDB", 2);
 request.onerror = () => alert("Error opening database.");
-request.onsuccess = (e) => { db = e.target.result; displayEntries(); };
-request.onupgradeneeded = (e) => {
+request.onsuccess = e => { db = e.target.result; displayEntries(); };
+request.onupgradeneeded = e => {
   db = e.target.result;
-  const store = db.createObjectStore("entries", { keyPath: "id", autoIncrement: true });
-  store.createIndex("title", "title", { unique: false });
+  if (!db.objectStoreNames.contains("entries")) {
+    const store = db.createObjectStore("entries", { keyPath: "id", autoIncrement: true });
+    store.createIndex("title", "title", { unique: false });
+  }
 };
 
-// Toggle form visibility
+// Toggle new entry form
 function toggleForm() {
-  document.getElementById('form').classList.toggle('hidden');
+  document.getElementById("form").classList.toggle("hidden");
 }
 
 // Save new entry
 function saveEntry() {
-  const title = document.getElementById('title').value.trim();
-  const content = document.getElementById('content').value.trim();
+  const title = document.getElementById("title").value.trim();
+  const content = document.getElementById("content").value.trim();
   if (!title || !content) { alert("Please fill in both fields."); return; }
 
   const tx = db.transaction("entries", "readwrite");
   const store = tx.objectStore("entries");
-  const entry = { title, content, date: new Date().toISOString() };
-  store.add(entry);
+  store.add({ title, content, date: new Date().toISOString() });
 
   tx.oncomplete = () => {
-    document.getElementById('title').value = '';
-    document.getElementById('content').value = '';
+    document.getElementById("title").value = '';
+    document.getElementById("content").value = '';
     toggleForm();
     displayEntries();
   };
 }
 
-// Display saved entries
+// Display all entries
 function displayEntries() {
-  if (!db) return;
   const tx = db.transaction("entries", "readonly");
   const store = tx.objectStore("entries");
   const req = store.getAll();
-  req.onsuccess = (e) => {
+
+  req.onsuccess = e => {
     const entries = e.target.result.reverse();
     const container = document.getElementById("entries");
     container.innerHTML = '';
@@ -80,13 +128,39 @@ function displayEntries() {
     entries.forEach(entry => {
       const date = new Date(entry.date).toLocaleString();
       container.innerHTML += `
-        <div class="card bg-white p-5 rounded-xl shadow-lg">
+        <div class="card bg-white p-5 rounded-xl shadow-lg cursor-pointer" onclick="openEntry(${entry.id})">
           <h3 class="text-xl font-bold text-indigo-600 mb-2">${entry.title}</h3>
-          <p class="text-gray-700 mb-3 whitespace-pre-line">${entry.content}</p>
+          <p class="text-gray-700 mb-2">${entry.content.substring(0,120)}${entry.content.length>120?'...':''}</p>
           <div class="text-sm text-gray-500">${date}</div>
         </div>`;
     });
   };
+}
+
+// Open modal view
+function openEntry(id) {
+  const tx = db.transaction("entries", "readonly");
+  const store = tx.objectStore("entries");
+  const req = store.get(id);
+  req.onsuccess = e => {
+    const entry = e.target.result;
+    if (!entry) return;
+    currentContent = entry.content;
+    document.getElementById("viewTitle").textContent = entry.title;
+    document.getElementById("viewContent").textContent = entry.content;
+    document.getElementById("viewDate").textContent = new Date(entry.date).toLocaleString();
+    document.getElementById("viewModal").classList.remove("hidden");
+  };
+}
+
+// Copy content
+function copyContent() {
+  navigator.clipboard.writeText(currentContent).then(() => alert("Copied to clipboard!"));
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById("viewModal").classList.add("hidden");
 }
 </script>
 
