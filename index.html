@@ -1,139 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MyDiary ✨ — Personal Diary & Blog</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MyDiary+ — Your Personal Space ✨</title>
+
+<!-- TailwindCSS -->
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<!-- UUID Generator -->
 <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
+
+<!-- Animations -->
 <style>
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #e0e7ff, #f5f3ff);
+  background: linear-gradient(120deg, #e0e7ff, #f5f3ff, #e0e7ff);
   min-height: 100vh;
-  color: #333;
+  overflow-x: hidden;
 }
-.card {transition: all .3s ease;}
-.card:hover {transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,.15);}
-.glow {animation: glow 2s ease-in-out infinite alternate;}
+
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+.card {
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
 @keyframes glow {
-  from {text-shadow: 0 0 5px #818cf8, 0 0 15px #6366f1;}
-  to {text-shadow: 0 0 15px #818cf8, 0 0 25px #6366f1;}
+  from { text-shadow: 0 0 5px #818cf8, 0 0 10px #6366f1; }
+  to { text-shadow: 0 0 15px #818cf8, 0 0 25px #6366f1; }
+}
+
+button {
+  transition: all 0.25s ease;
+}
+button:hover {
+  transform: scale(1.05);
 }
 </style>
 </head>
-<body>
+
+<body class="text-gray-800">
 
 <!-- Navbar -->
-<nav class="bg-white bg-opacity-90 shadow-md py-4 px-6 flex justify-between items-center">
-  <h1 class="text-3xl font-extrabold text-indigo-600 glow">🪶 MyDiary+</h1>
-  <button onclick="toggleForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md">+ New Entry</button>
+<nav class="bg-white bg-opacity-90 backdrop-blur-lg shadow-md py-4 px-6 flex justify-between items-center">
+  <h1 class="text-3xl font-extrabold text-indigo-600 glow">📔 MyDiary+</h1>
+  <button onclick="toggleForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg shadow-md">+ New Entry</button>
 </nav>
 
 <!-- Post Form -->
-<section id="postForm" class="hidden bg-white bg-opacity-90 shadow-xl mx-auto mt-6 w-11/12 md:w-2/3 p-6 rounded-2xl">
-  <h2 class="text-2xl font-semibold mb-4 text-indigo-700">✍️ Write a New Diary Entry</h2>
-  <input id="title" type="text" placeholder="Title..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 outline-none">
-  <textarea id="content" placeholder="Write your thoughts..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 outline-none h-36"></textarea>
-  <button onclick="savePost()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-md">💾 Save Entry</button>
+<section id="postForm" class="hidden bg-white bg-opacity-95 shadow-xl mx-auto mt-6 w-11/12 md:w-2/3 p-6 rounded-2xl fade-in">
+  <h2 class="text-2xl font-semibold mb-4 text-indigo-700">✍️ Write Your Thoughts</h2>
+  <input id="title" type="text" placeholder="Your title..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 outline-none">
+  <textarea id="content" placeholder="Start writing..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 outline-none h-36"></textarea>
+  <div class="flex justify-end gap-3">
+    <button onclick="toggleForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg">Cancel</button>
+    <button onclick="savePost()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg">💾 Save Entry</button>
+  </div>
 </section>
 
 <!-- Posts Section -->
-<main id="posts" class="grid gap-6 mt-8 p-6 md:grid-cols-2 lg:grid-cols-3"></main>
+<main id="posts" class="grid gap-6 mt-8 p-6 md:grid-cols-2 lg:grid-cols-3 fade-in"></main>
 
 <footer class="mt-12 text-center py-6 text-gray-500">
-  © 2025 MyDiary+ | Your personal space to write, remember, and share 💌
+  © 2025 MyDiary+. Crafted with 💜 by You.
 </footer>
 
 <script>
-// Toggle form visibility
 function toggleForm() {
   document.getElementById('postForm').classList.toggle('hidden');
 }
 
-// Load posts from LocalStorage
+// Load posts
 function loadPosts() {
   const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-  const postsContainer = document.getElementById('posts');
-  postsContainer.innerHTML = '';
+  const container = document.getElementById('posts');
+  container.innerHTML = '';
 
   const params = new URLSearchParams(window.location.search);
-  const viewPost = params.get('post');
+  const postId = params.get('post');
 
-  if (viewPost) {
-    const found = posts.find(p => p.id === viewPost);
-    if (found) {
-      postsContainer.innerHTML = renderSinglePost(found);
-    } else {
-      postsContainer.innerHTML = `<p class='text-center text-gray-600 mt-10'>⚠️ Entry not found.</p>`;
-    }
+  if (postId) {
+    const found = posts.find(p => p.id === postId);
+    container.innerHTML = found ? renderSinglePost(found) : `<p class='text-center text-gray-600 mt-10'>⚠️ Entry not found.</p>`;
     return;
   }
 
   if (posts.length === 0) {
-    postsContainer.innerHTML = `<p class='text-center text-gray-600 mt-10'>No entries yet — start writing your first one!</p>`;
+    container.innerHTML = `<p class='text-center text-gray-600 mt-10'>No diary entries yet. Click “+ New Entry” to begin ✨</p>`;
     return;
   }
 
-  posts.reverse().forEach(post => postsContainer.innerHTML += renderPost(post));
-}
-
-// Render single post view
-function renderSinglePost(post) {
-  const link = `${location.origin}${location.pathname}?post=${post.id}`;
-  return `
-    <div class="card bg-white p-6 rounded-2xl shadow-lg mx-auto md:w-2/3">
-      <h2 class="text-3xl font-bold text-indigo-600 mb-3">${post.title}</h2>
-      <p class="whitespace-pre-line text-gray-700 leading-relaxed mb-4">${post.content}</p>
-      <div class="text-sm text-gray-500 mb-4">${new Date(post.date).toLocaleString()}</div>
-      <div class="flex justify-between items-center">
-        <button onclick="copyLink('${link}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded-lg">🔗 Copy Link</button>
-        <a href="${location.pathname}" class="text-indigo-600 hover:underline">← Back to Diary</a>
-      </div>
-    </div>
-  `;
-}
-
-// Render all posts
-function renderPost(post) {
-  const link = `${location.origin}${location.pathname}?post=${post.id}`;
-  return `
-    <div class="card bg-white p-5 rounded-2xl shadow-lg flex flex-col justify-between">
-      <div>
-        <h3 class="text-2xl font-bold mb-2 text-indigo-600">${post.title}</h3>
-        <p class="text-gray-700 mb-3 whitespace-pre-line">${post.content.substring(0, 120)}${post.content.length > 120 ? '...' : ''}</p>
-      </div>
-      <div class="flex justify-between items-center text-sm">
-        <span class="text-gray-500">${new Date(post.date).toLocaleString()}</span>
-        <div class="flex gap-3">
-          <button onclick="shareWhatsApp('${encodeURIComponent(post.title)}','${encodeURIComponent(post.content)}','${link}')" class="text-green-600 hover:text-green-700">📱</button>
-          <button onclick="copyLink('${link}')" class="text-gray-600 hover:text-gray-800">🔗</button>
-          <a href="${link}" class="text-indigo-600 hover:underline">View</a>
-        </div>
-      </div>
-    </div>
-  `;
+  posts.slice().reverse().forEach(p => container.innerHTML += renderPost(p));
 }
 
 // Save new post
 function savePost() {
   const title = document.getElementById('title').value.trim();
   const content = document.getElementById('content').value.trim();
+  if (!title || !content) return alert('Please fill in both fields!');
 
-  if (!title || !content) {
-    alert('Please fill in both the title and content.');
-    return;
-  }
-
-  const post = {
-    id: uuidv4(),
-    title,
-    content,
-    date: new Date().toISOString()
-  };
-
+  const newPost = { id: uuidv4(), title, content, date: new Date().toISOString() };
   const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-  posts.push(post);
+  posts.push(newPost);
   localStorage.setItem('posts', JSON.stringify(posts));
 
   document.getElementById('title').value = '';
@@ -141,21 +123,57 @@ function savePost() {
   toggleForm();
   loadPosts();
 
-  alert('✅ Entry saved to your diary! You can now view or share it.');
+  alert('✅ Saved successfully!');
 }
 
-// Share via WhatsApp
+// Render all posts
+function renderPost(p) {
+  const link = `${location.origin}${location.pathname}?post=${p.id}`;
+  return `
+  <div class="card bg-white p-5 rounded-2xl shadow-lg flex flex-col justify-between">
+    <div>
+      <h3 class="text-2xl font-bold mb-2 text-indigo-600">${p.title}</h3>
+      <p class="text-gray-700 mb-3 whitespace-pre-line">${p.content.substring(0, 120)}${p.content.length > 120 ? '...' : ''}</p>
+    </div>
+    <div class="flex justify-between items-center text-sm">
+      <span class="text-gray-500">${new Date(p.date).toLocaleString()}</span>
+      <div class="flex gap-3">
+        <button onclick="copyLink('${link}')" title="Copy link" class="text-gray-600 hover:text-gray-800">🔗</button>
+        <button onclick="shareWhatsApp('${encodeURIComponent(p.title)}','${encodeURIComponent(p.content)}','${link}')" title="Share on WhatsApp" class="text-green-600 hover:text-green-700">📱</button>
+        <a href="${link}" class="text-indigo-600 hover:underline">View</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Render a single post page
+function renderSinglePost(p) {
+  const link = `${location.origin}${location.pathname}?post=${p.id}`;
+  return `
+  <div class="card bg-white p-6 rounded-2xl shadow-lg mx-auto md:w-2/3">
+    <h2 class="text-3xl font-bold text-indigo-600 mb-3">${p.title}</h2>
+    <p class="whitespace-pre-line text-gray-700 leading-relaxed mb-4">${p.content}</p>
+    <div class="text-sm text-gray-500 mb-4">${new Date(p.date).toLocaleString()}</div>
+    <div class="flex justify-between items-center">
+      <button onclick="copyLink('${link}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded-lg">Copy Link</button>
+      <a href="${location.pathname}" class="text-indigo-600 hover:underline">← Back to Diary</a>
+    </div>
+  </div>`;
+}
+
+// Copy to clipboard
+function copyLink(link) {
+  navigator.clipboard.writeText(link);
+  alert('🔗 Link copied! You can share it anywhere.');
+}
+
+// WhatsApp share
 function shareWhatsApp(title, content, link) {
   const msg = `${decodeURIComponent(title)}%0A${decodeURIComponent(content)}%0A🔗 ${link}`;
   window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 
-// Copy post link
-function copyLink(link) {
-  navigator.clipboard.writeText(link);
-  alert('📋 Post link copied to clipboard!');
-}
-
+// Load existing posts
 loadPosts();
 </script>
 
