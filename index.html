@@ -3,31 +3,30 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MyDiary+ — Private Diary with Copy & View</title>
+<title>MyDiary+ — Private & Stylish Diary</title>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-
 <style>
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(120deg, #e0e7ff, #f5f3ff);
+  background: linear-gradient(135deg, #f0f4ff, #faf7ff);
   min-height: 100vh;
-  overflow-x: hidden;
 }
 .card {
   transition: all 0.3s ease;
 }
 .card:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
 }
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
+  animation: fadeIn 0.3s ease;
 }
 .modal-content {
   background: white;
@@ -37,6 +36,14 @@ body {
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 </style>
 </head>
@@ -44,30 +51,31 @@ body {
 <body class="text-gray-800">
 
 <!-- Navbar -->
-<nav class="bg-white bg-opacity-90 shadow-md py-4 px-6 flex justify-between items-center">
+<nav class="bg-white bg-opacity-90 shadow-md py-4 px-6 flex justify-between items-center sticky top-0">
   <h1 class="text-3xl font-extrabold text-indigo-600">📔 MyDiary+</h1>
-  <button onclick="toggleForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">+ New Entry</button>
+  <button onclick="toggleForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition">+ New Entry</button>
 </nav>
 
-<!-- Form -->
+<!-- Form Section -->
 <section id="form" class="hidden bg-white shadow-xl mx-auto mt-6 w-11/12 md:w-2/3 p-6 rounded-xl">
+  <h2 class="text-xl font-semibold mb-3 text-indigo-700">📝 Write a new entry</h2>
   <input id="title" placeholder="Title..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400" />
-  <textarea id="content" placeholder="Write your thoughts..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 h-36"></textarea>
+  <textarea id="content" placeholder="What's on your mind today..." class="border w-full mb-3 px-3 py-2 rounded-md focus:ring-2 focus:ring-indigo-400 h-36"></textarea>
   <button onclick="saveEntry()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg">Save Entry</button>
 </section>
 
-<!-- Entries -->
-<main id="entries" class="grid gap-6 mt-8 p-6 md:grid-cols-2 lg:grid-cols-3"></main>
+<!-- Entries Display -->
+<main id="entries" class="grid gap-6 mt-8 p-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"></main>
 
-<!-- Modal for viewing -->
+<!-- Modal for Viewing Entries -->
 <div id="viewModal" class="hidden modal">
   <div class="modal-content">
     <h2 id="viewTitle" class="text-2xl font-bold text-indigo-600 mb-2"></h2>
     <p id="viewContent" class="whitespace-pre-line text-gray-700 mb-4"></p>
     <div class="text-sm text-gray-500 mb-3" id="viewDate"></div>
     <div class="flex justify-end gap-3">
-      <button onclick="copyContent()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded-lg">Copy Text</button>
-      <button onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded-lg">Close</button>
+      <button onclick="copyContent()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1 rounded-lg">📋 Copy Text</button>
+      <button onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded-lg">❌ Close</button>
     </div>
   </div>
 </div>
@@ -76,8 +84,8 @@ body {
 let db;
 let currentContent = "";
 
-// IndexedDB setup
-const request = indexedDB.open("MyDiaryDB", 2);
+// Initialize IndexedDB
+const request = indexedDB.open("MyDiaryDB", 3);
 request.onerror = () => alert("Error opening database.");
 request.onsuccess = e => { db = e.target.result; displayEntries(); };
 request.onupgradeneeded = e => {
@@ -88,7 +96,7 @@ request.onupgradeneeded = e => {
   }
 };
 
-// Toggle new entry form
+// Toggle form
 function toggleForm() {
   document.getElementById("form").classList.toggle("hidden");
 }
@@ -111,7 +119,7 @@ function saveEntry() {
   };
 }
 
-// Display all entries
+// Display all entries (showing only 5 words preview)
 function displayEntries() {
   const tx = db.transaction("entries", "readonly");
   const store = tx.objectStore("entries");
@@ -122,22 +130,24 @@ function displayEntries() {
     const container = document.getElementById("entries");
     container.innerHTML = '';
     if (entries.length === 0) {
-      container.innerHTML = "<p class='text-center text-gray-500 mt-10'>No entries yet.</p>";
+      container.innerHTML = "<p class='text-center text-gray-500 mt-10'>No entries yet. Start writing something! ✨</p>";
       return;
     }
+
     entries.forEach(entry => {
       const date = new Date(entry.date).toLocaleString();
+      const preview = entry.content.split(" ").slice(0, 5).join(" ") + (entry.content.split(" ").length > 5 ? "..." : "");
       container.innerHTML += `
         <div class="card bg-white p-5 rounded-xl shadow-lg cursor-pointer" onclick="openEntry(${entry.id})">
           <h3 class="text-xl font-bold text-indigo-600 mb-2">${entry.title}</h3>
-          <p class="text-gray-700 mb-2">${entry.content.substring(0,120)}${entry.content.length>120?'...':''}</p>
+          <p class="text-gray-700 italic mb-2">${preview}</p>
           <div class="text-sm text-gray-500">${date}</div>
         </div>`;
     });
   };
 }
 
-// Open modal view
+// Open selected entry
 function openEntry(id) {
   const tx = db.transaction("entries", "readonly");
   const store = tx.objectStore("entries");
@@ -153,9 +163,11 @@ function openEntry(id) {
   };
 }
 
-// Copy content
+// Copy text to clipboard
 function copyContent() {
-  navigator.clipboard.writeText(currentContent).then(() => alert("Copied to clipboard!"));
+  navigator.clipboard.writeText(currentContent).then(() => {
+    alert("📋 Diary content copied successfully!");
+  });
 }
 
 // Close modal
@@ -163,6 +175,5 @@ function closeModal() {
   document.getElementById("viewModal").classList.add("hidden");
 }
 </script>
-
 </body>
 </html>
